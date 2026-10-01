@@ -273,7 +273,7 @@ async function loadRecipe() {
                     <p>Prep: ${recipe.prepTimeMinutes} min, cook: ${recipe.cookTimeMinutes} min</p>
                     <div class="actions">
                         <button class="btn" id="save-btn"></button>
-                        <a class="btn ghost" style="text-decoration:none" href="recipe.html">🎲 Random</a>
+                        <a class="btn ghost" style="text-decoration:none" href="recipe.html"> Random</a>
                     </div>
                 </div>
             </div>
