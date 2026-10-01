@@ -107,8 +107,6 @@ async function loadMain() {
   }
 }
 
-// ===== search.html: поиск =====
-
 function loadSearch() {
   const inp = document.getElementById("inp");
   const res = document.getElementById("result");
