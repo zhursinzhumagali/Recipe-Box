@@ -1,0 +1,2 @@
+# Recipe-Box
+Our website is made for people who love cooking and want to find the right recipe quickly. You can search for dishes by name and category, save your favorite recipes, rate them, and share your thoughts in the comments. Registered users can also add their own recipes and share them with others.
