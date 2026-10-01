@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Поиск — Nu zhan</title>
+    <link rel="stylesheet" href="../style.css" />
+  </head>
+  <body data-page="search">
+    <header>
+      <h1>Nu zhan</h1>
+      <div class="pages">
+        <a href="main.html">Главная</a>
+        <a href="search.html" class="active">Поиск</a>
+        <a href="chosen.html">Избранное</a>
+        <a href="recipe.html">Интересное</a>
+        <a href="../f1/register.html">Регистрация</a>
+        <a href="../f1/login.html">Вход</a>
+        <a href="../f1/profile.html">Профиль</a>
+        <a href="../f1/add_recipe.html">Добавить рецепт</a>
+      </div>
+    </header>
+    <div class="mid">
+      <h2>Поиск рецептов</h2>
+      <p class="subtitle">
+        Введите название блюда на английском, например: chicken, pasta, cake.
+      </p>
+      <input
+        type="text"
+        id="inp"
+        placeholder="Что будем готовить?"
+        autocomplete="off"
+      />
+      <div class="grid" id="result"></div>
+    </div>
+    <footer></footer>
+    <script src="f2.js"></script>
+  </body>
+</html>
