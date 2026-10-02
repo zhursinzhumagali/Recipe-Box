@@ -16,5 +16,5 @@ app.get("/health", async (req, res) => {
 app.use("/recipes", recipesRoutes);
 
 app.listen(process.env.PORT, () => {
-  console.log("Сервер запущен на порту " + process.env.PORT);
+  console.log("Server is running on port " + process.env.PORT);
 });
