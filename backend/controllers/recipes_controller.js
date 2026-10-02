@@ -35,7 +35,7 @@ export async function getRecipeById(req, res, next) {
       [req.params.id]
     );
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "Рецепт не найден" });
+      return res.status(404).json({ error: "Recipe not found" });
     }
     res.json(result.rows[0]);
   } catch (err) {
