@@ -24,6 +24,9 @@ export async function getRecipes(req, res, next) {
 
 export async function getRecipeById(req, res, next) {
   try {
+    if (isNaN(req.params.id)) {
+      return res.status(400).json({ error: "Recipe id must be a number" });
+    }
     const result = await pool.query(
       `SELECT r.*, c.name AS category,
               ROUND(AVG(rt.value), 1) AS avg_rating
