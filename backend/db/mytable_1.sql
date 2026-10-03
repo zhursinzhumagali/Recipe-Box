@@ -5,9 +5,19 @@ CREATE TABLE users (
 	password VARCHAR (100)
 );
 
+CREATE TABLE categories (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(50) UNIQUE NOT NULL
+);
+
 CREATE TABLE recipes (
   id SERIAL PRIMARY KEY,
-  title VARCHAR(150)
+  title VARCHAR(150) NOT NULL,
+  description TEXT,
+  steps TEXT,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  category_id INT REFERENCES categories(id),
+  created_at TIMESTAMP DEFAULT NOW()
 );
 
 CREATE TABLE favorites (
