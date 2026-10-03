@@ -1,28 +1,110 @@
-const API = "https://dummyjson.com/recipes";
-
 const BACKEND = "http://localhost:3000";
 
 const USER_ID = 1;
 
+async function request(url, options) {
+  let response;
+  try {
+    response = await fetch(url, options);
+  } catch (error) {
+    throw new Error("Cannot reach the server. Is it running?");
+  }
+
+  if (!response.ok) {
+    let message = "Server error";
+    try {
+      const data = await response.json();
+      if (data.error) {
+        message = data.error;
+      }
+    } catch (error) {}
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+function postJson(url, body) {
+  return request(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
+
+function recipesUrl(options) {
+  const params = new URLSearchParams();
+  if (options.search) params.set("search", options.search);
+  if (options.category) params.set("category", options.category);
+  if (options.page) params.set("page", options.page);
+  if (options.limit) params.set("limit", options.limit);
+  return BACKEND + "/recipes?" + params.toString();
+}
+
+function escapeHtml(text) {
+  if (text === null || text === undefined) {
+    return "";
+  }
+  return String(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function formatDate(value) {
+  const date = new Date(value);
+  if (isNaN(date.getTime())) {
+    return "";
+  }
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function placeholder(title, height, radius) {
+  const letter = escapeHtml(
+    String(title || "?")
+      .charAt(0)
+      .toUpperCase(),
+  );
+  return (
+    '<div style="height:' +
+    height +
+    "px;background:var(--accent);color:#fff;" +
+    "display:flex;align-items:center;justify-content:center;font-size:64px;" +
+    "font-weight:700;border-radius:" +
+    radius +
+    'px">' +
+    letter +
+    "</div>"
+  );
+}
+
+function ratingText(avg) {
+  if (avg === null || avg === undefined) {
+    return "No ratings yet";
+  }
+  return avg + " / 5";
+}
+
 let chosenIds = [];
 
-async function getChosenIds() {
-  const response = await fetch(BACKEND + "/favorites/" + USER_ID);
-  if (!response.ok) {
-    throw new Error("Server error");
-  }
+async function getChosen() {
+  const data = await request(BACKEND + "/favorites?user_id=" + USER_ID);
 
-  const rows = await response.json();
   chosenIds = [];
-  for (let i = 0; i < rows.length; i++) {
-    chosenIds.push(rows[i].recipe_id);
+  for (let i = 0; i < data.favorites.length; i++) {
+    chosenIds.push(data.favorites[i].id);
   }
-  return chosenIds;
+  return data.favorites;
 }
 
 async function loadChosenIds() {
   try {
-    await getChosenIds();
+    await getChosen();
   } catch (error) {
     console.error("Could not load favorites:", error);
   }
@@ -34,25 +116,16 @@ function isChosen(id) {
 
 async function toggleChosen(recipe) {
   const wasChosen = isChosen(recipe.id);
-  let response;
 
   if (wasChosen) {
-    response = await fetch(
-      BACKEND + "/favorites/" + USER_ID + "/" + recipe.id,
-      {
-        method: "DELETE",
-      },
-    );
-  } else {
-    response = await fetch(BACKEND + "/favorites", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ user_id: USER_ID, recipe_id: recipe.id }),
+    await request(BACKEND + "/favorites/" + recipe.id + "?user_id=" + USER_ID, {
+      method: "DELETE",
     });
-  }
-
-  if (!response.ok) {
-    throw new Error("Server error");
+  } else {
+    await postJson(BACKEND + "/favorites", {
+      user_id: USER_ID,
+      recipe_id: recipe.id,
+    });
   }
 
   if (wasChosen) {
@@ -74,17 +147,11 @@ function createCard(recipe, afterClick) {
 
   card.innerHTML = `
         <a href="recipe.html?id=${recipe.id}">
-            <img src="${recipe.image}" alt="${recipe.name}">
+            ${placeholder(recipe.title, 190, 0)}
         </a>
         <div class="card-body">
-            <h3><a href="recipe.html?id=${recipe.id}">${recipe.name}</a></h3>
-            <div class="tags">
-                <span class="tag">${recipe.cuisine}</span>
-                <span class="tag">${recipe.difficulty}</span>
-                <span class="tag">${recipe.prepTimeMinutes + recipe.cookTimeMinutes} min</span>
-            </div>
-            <div class="rating">${recipe.rating} <span>(${recipe.reviewCount} reviews)</span></div>
-            <p class="desc">${recipe.instructions[0]}</p>
+            <h3><a href="recipe.html?id=${recipe.id}">${escapeHtml(recipe.title)}</a></h3>
+            <p class="desc">${escapeHtml(recipe.description)}</p>
             <button class="btn"></button>
         </div>
     `;
@@ -102,7 +169,7 @@ function createCard(recipe, afterClick) {
     try {
       await toggleChosen(recipe);
     } catch (error) {
-      alert("Could not update favorites. Is the server running?");
+      alert("Could not update favorites: " + error.message);
       return;
     }
     btn.classList.toggle("saved");
@@ -133,13 +200,18 @@ async function loadMain() {
   const status = document.getElementById("status");
 
   try {
-    const response = await fetch(API + "?limit=50");
-    const data = await response.json();
+    const data = await request(recipesUrl({ page: 1, limit: 50 }));
     await loadChosenIds();
+
+    if (data.recipes.length === 0) {
+      status.textContent = "No recipes yet";
+      return;
+    }
+
     status.remove();
     showRecipes(grid, data.recipes);
   } catch (error) {
-    status.textContent = "Failed to load recipes";
+    status.textContent = "Failed to load recipes: " + error.message;
   }
 }
 
@@ -147,18 +219,20 @@ function loadSearch() {
   const inp = document.getElementById("inp");
   const res = document.getElementById("result");
   const ready = loadChosenIds();
+  let timer;
 
-  inp.addEventListener("input", async function () {
-    const value = inp.value.toLowerCase();
-    res.innerHTML = "";
-    if (value.trim() === "") return;
+  async function search() {
+    const value = inp.value.trim();
+    if (value === "") {
+      res.innerHTML = "";
+      return;
+    }
 
     try {
-      const response = await fetch(API + "/search?q=" + value);
-      const data = await response.json();
+      const data = await request(recipesUrl({ search: value, limit: 50 }));
       await ready;
 
-      if (inp.value.toLowerCase() !== value) return;
+      if (inp.value.trim() !== value) return;
 
       if (data.recipes.length === 0) {
         res.innerHTML = '<p class="status">Nothing found</p>';
@@ -166,8 +240,17 @@ function loadSearch() {
       }
       showRecipes(res, data.recipes);
     } catch (error) {
-      res.innerHTML = '<p class="status">Loading error</p>';
+      res.innerHTML =
+        '<p class="status">Loading error: ' +
+        escapeHtml(error.message) +
+        "</p>";
     }
+  }
+
+  inp.addEventListener("input", function () {
+    clearTimeout(timer);
+    res.innerHTML = "";
+    timer = setTimeout(search, 300);
   });
 }
 
@@ -175,46 +258,26 @@ async function loadChosen() {
   const grid = document.getElementById("recipes");
   const status = document.getElementById("status");
 
-  let ids;
+  let list;
   try {
-    ids = await getChosenIds();
+    list = await getChosen();
   } catch (error) {
     grid.innerHTML = "";
     status.style.display = "block";
-    status.textContent = "Failed to load favorites. Is the server running?";
+    status.textContent = "Failed to load favorites: " + error.message;
     return;
   }
 
   grid.innerHTML = "";
 
-  if (ids.length === 0) {
+  if (list.length === 0) {
     status.style.display = "block";
     status.innerHTML =
       'Nothing here yet. Click “Save” on a recipe on the <a href="main.html">home page</a>.';
-    return;
+  } else {
+    status.style.display = "none";
+    showRecipes(grid, list, loadChosen);
   }
-
-  let list;
-  try {
-    list = await Promise.all(
-      ids.map(function (id) {
-        return fetch(API + "/" + id).then(function (response) {
-          return response.json();
-        });
-      }),
-    );
-  } catch (error) {
-    status.style.display = "block";
-    status.textContent = "Failed to load recipes";
-    return;
-  }
-
-  list = list.filter(function (recipe) {
-    return recipe.id !== undefined;
-  });
-
-  status.style.display = "none";
-  showRecipes(grid, list, loadChosen);
 }
 
 const facts = [
@@ -233,52 +296,117 @@ function showFact() {
   document.getElementById("fact").textContent = facts[number];
 }
 
+async function getRandomRecipeId() {
+  const data = await request(recipesUrl({ limit: 50 }));
+  if (data.recipes.length === 0) {
+    return null;
+  }
+  const number = Math.floor(Math.random() * data.recipes.length);
+  return data.recipes[number].id;
+}
+
+async function loadComments(recipeId) {
+  const list = document.getElementById("comments-list");
+
+  try {
+    const data = await request(BACKEND + "/recipes/" + recipeId + "/comments");
+
+    if (data.comments.length === 0) {
+      list.innerHTML =
+        '<p class="status" style="padding:12px 0">No comments yet</p>';
+      return;
+    }
+
+    let html = "";
+    for (let i = 0; i < data.comments.length; i++) {
+      const comment = data.comments[i];
+      html +=
+        '<p style="margin-bottom:12px"><b>' +
+        escapeHtml(comment.author) +
+        "</b> " +
+        '<span style="color:var(--muted);font-size:12px">' +
+        formatDate(comment.created_at) +
+        "</span><br>" +
+        escapeHtml(comment.text) +
+        "</p>";
+    }
+    list.innerHTML = html;
+  } catch (error) {
+    list.innerHTML =
+      '<p class="status" style="padding:12px 0">Failed to load comments: ' +
+      escapeHtml(error.message) +
+      "</p>";
+  }
+}
+
 async function loadRecipe() {
   const box = document.getElementById("recipe");
 
   showFact();
   document.getElementById("fact-btn").addEventListener("click", showFact);
 
-  let id = window.location.search.split("id=")[1];
-  if (id === undefined) {
-    id = Math.floor(Math.random() * 50) + 1;
-  }
-
   try {
-    const response = await fetch(API + "/" + id);
-    const recipe = await response.json();
-
-    let ingredients = "";
-    for (let i = 0; i < recipe.ingredients.length; i++) {
-      ingredients += "<li>" + recipe.ingredients[i] + "</li>";
+    let id = window.location.search.split("id=")[1];
+    if (id === undefined) {
+      id = await getRandomRecipeId();
+      if (id === null) {
+        box.innerHTML = '<p class="status">No recipes yet</p>';
+        return;
+      }
     }
 
-    let steps = "";
-    for (let i = 0; i < recipe.instructions.length; i++) {
-      steps += "<li>" + recipe.instructions[i] + "</li>";
+    const recipe = await request(BACKEND + "/recipes/" + id);
+
+    let about = "";
+    if (recipe.description) {
+      about =
+        '<div class="panel"><h3>Description</h3><p>' +
+        escapeHtml(recipe.description) +
+        "</p></div>";
+    }
+
+    let category = "";
+    if (recipe.category) {
+      category = '<span class="tag">' + escapeHtml(recipe.category) + "</span>";
     }
 
     box.innerHTML = `
             <div class="recipe-top">
-                <img src="${recipe.image}" alt="${recipe.name}">
+                ${placeholder(recipe.title, 260, 18)}
                 <div>
-                    <h2>${recipe.name}</h2>
+                    <h2>${escapeHtml(recipe.title)}</h2>
                     <div class="tags">
-                        <span class="tag">${recipe.cuisine}</span>
-                        <span class="tag">${recipe.difficulty}</span>
-                        <span class="tag">${recipe.servings} servings</span>
-                        <span class="tag">${recipe.caloriesPerServing} kcal</span>
+                        ${category}
+                        <span class="tag">Added ${formatDate(recipe.created_at)}</span>
                     </div>
-                    <p class="rating" style="margin-top:12px">${recipe.rating} <span>(${recipe.reviewCount} reviews)</span></p>
-                    <p>Prep: ${recipe.prepTimeMinutes} min, cook: ${recipe.cookTimeMinutes} min</p>
+                    <p class="rating" id="rating-line" style="margin-top:12px">${ratingText(recipe.avg_rating)}</p>
                     <div class="actions">
                         <button class="btn" id="save-btn"></button>
-                        <a class="btn ghost" style="text-decoration:none" href="recipe.html"> Random</a>
+                        <a class="btn ghost" style="text-decoration:none" href="recipe.html">Random</a>
                     </div>
                 </div>
             </div>
-            <div class="panel"><h3>Ingredients</h3><ul>${ingredients}</ul></div>
-            <div class="panel"><h3>Instructions</h3><ol>${steps}</ol></div>
+            ${about}
+            <div class="panel"><h3>Instructions</h3><p>${escapeHtml(recipe.steps)}</p></div>
+            <div class="panel">
+                <h3>Rate this recipe</h3>
+                <div class="actions" id="rate-buttons" style="margin-top:0">
+                    <button class="btn ghost">1</button>
+                    <button class="btn ghost">2</button>
+                    <button class="btn ghost">3</button>
+                    <button class="btn ghost">4</button>
+                    <button class="btn ghost">5</button>
+                </div>
+                <p id="rate-msg" style="margin-top:10px;color:var(--muted)"></p>
+            </div>
+            <div class="panel">
+                <h3>Comments</h3>
+                <div id="comments-list"></div>
+                <textarea id="comment-text" rows="3" placeholder="Write a comment..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:12px;font:inherit;margin-top:12px"></textarea>
+                <div class="actions">
+                    <button class="btn" id="comment-btn">Send</button>
+                </div>
+            </div>
         `;
 
     await loadChosenIds();
@@ -294,7 +422,7 @@ async function loadRecipe() {
       try {
         await toggleChosen(recipe);
       } catch (error) {
-        alert("Could not update favorites. Is the server running?");
+        alert("Could not update favorites: " + error.message);
         return;
       }
       btn.classList.toggle("saved");
@@ -304,8 +432,53 @@ async function loadRecipe() {
         btn.textContent = "Save";
       }
     });
+
+    const rateButtons = document.querySelectorAll("#rate-buttons button");
+    for (let i = 0; i < rateButtons.length; i++) {
+      rateButtons[i].addEventListener("click", async function () {
+        const message = document.getElementById("rate-msg");
+        try {
+          await postJson(BACKEND + "/recipes/" + recipe.id + "/rating", {
+            user_id: USER_ID,
+            value: i + 1,
+          });
+          const fresh = await request(BACKEND + "/recipes/" + recipe.id);
+          document.getElementById("rating-line").textContent = ratingText(
+            fresh.avg_rating,
+          );
+          message.textContent =
+            "Thanks! You rated this recipe " + (i + 1) + " / 5.";
+        } catch (error) {
+          message.textContent = "Could not save the rating: " + error.message;
+        }
+      });
+    }
+
+    loadComments(recipe.id);
+
+    document
+      .getElementById("comment-btn")
+      .addEventListener("click", async function () {
+        const field = document.getElementById("comment-text");
+        const text = field.value.trim();
+        if (text === "") return;
+
+        try {
+          await postJson(BACKEND + "/recipes/" + recipe.id + "/comments", {
+            user_id: USER_ID,
+            text: text,
+          });
+          field.value = "";
+          await loadComments(recipe.id);
+        } catch (error) {
+          alert("Could not send the comment: " + error.message);
+        }
+      });
   } catch (error) {
-    box.innerHTML = '<p class="status">Failed to load recipe</p>';
+    box.innerHTML =
+      '<p class="status">Failed to load recipe: ' +
+      escapeHtml(error.message) +
+      "</p>";
   }
 }
 
