@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Forgot password — Recipe-Box</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="login-page">
+    <aside class="intro">
+      <a href="../f2/main.html" class="logo">Ну Жан!</a>
+      <h1 class="headline">Let's get you back in</h1>
+      <ul class="perks">
+        <li>Enter the email you signed up with</li>
+        <li>We will send you a reset link</li>
+        <li>Choose a new password and sign in</li>
+      </ul>
+      <div aria-hidden="true">
+        <span class="shape shape-circle"></span>
+        <span class="shape shape-ring"></span>
+        <span class="shape shape-square"></span>
+        <span class="shape shape-dots"></span>
+        <span class="shape shape-half"></span>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <div aria-hidden="true">
+        <span class="shape blob-circle"></span>
+        <span class="shape blob-ring"></span>
+        <span class="shape blob-square"></span>
+        <span class="shape blob-dots"></span>
+        <span class="shape blob-small"></span>
+      </div>
+      <form id="forgot-form" class="form" novalidate>
+        <h2>Forgot password?</h2>
+
+        <noscript><p class="alert">Please enable JavaScript to reset your password</p></noscript>
+        <p id="notice" class="notice" role="status" hidden></p>
+        <p id="server-error" class="alert" role="alert" hidden></p>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email">
+          <p id="email-error" class="field-error" hidden></p>
+        </div>
+
+        <button id="submit-button" class="submit" type="submit">Send reset link</button>
+
+        <p class="switch">Remembered it? <a href="../login/login.html">Sign in</a></p>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

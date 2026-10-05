@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Profile — Recipe-Box</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-bowl" viewBox="0 0 64 64"><path d="M6 28h52a26 26 0 0 1-52 0z" fill="currentColor"/><path d="M22 20c-4-4 4-6 0-12M34 20c-4-4 4-6 0-12M46 20c-4-4 4-6 0-12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-cupcake" viewBox="0 0 64 64"><path d="M16 40h32l-4 18H20z" fill="currentColor"/><path d="M12 36c0-12 8-20 20-20s20 8 20 20z" fill="currentColor"/><circle cx="32" cy="10" r="4" fill="currentColor"/></symbol>
+    <symbol id="i-cutlery" viewBox="0 0 64 64"><path d="M14 6v16a7 7 0 0 0 5 6.7V58h4V28.7a7 7 0 0 0 5-6.7V6h-3v14h-3V6h-3v14h-3V6z" fill="currentColor"/><path d="M46 6c-7 6-9 18-7 30h7v22h4V6z" fill="currentColor"/></symbol>
+    <symbol id="i-pizza" viewBox="0 0 64 64"><path d="M32 60 4 16a48 48 0 0 1 56 0z" fill="currentColor"/><circle class="cut" cx="26" cy="26" r="4"/><circle class="cut" cx="38" cy="32" r="4"/><circle class="cut" cx="30" cy="42" r="3"/></symbol>
+    <symbol id="i-carrot" viewBox="0 0 64 64"><path d="M44 16c6 6 4 14-2 22L16 60 4 48 26 22c4-8 12-12 18-6z" fill="currentColor"/><path d="M46 14l8-8M50 20l10-4M42 10l2-8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-mug" viewBox="0 0 64 64"><path d="M8 22h36v22a14 14 0 0 1-14 14H22A14 14 0 0 1 8 44z" fill="currentColor"/><path d="M44 28h6a7 7 0 0 1 0 14h-6" fill="none" stroke="currentColor" stroke-width="4"/></symbol>
+  </svg>
+  <div class="backdrop" aria-hidden="true">
+    <svg class="doodle d1"><use href="#i-bowl"/></svg>
+    <svg class="doodle d2"><use href="#i-cupcake"/></svg>
+    <svg class="doodle d3"><use href="#i-cutlery"/></svg>
+    <svg class="doodle d4"><use href="#i-pizza"/></svg>
+    <svg class="doodle d5"><use href="#i-carrot"/></svg>
+    <svg class="doodle d6"><use href="#i-mug"/></svg>
+  </div>
+  <header class="topbar">
+    <a href="../f2/main.html" class="logo">Ну Жан!</a>
+    <nav>
+      <a href="../f2/main.html">Home</a>
+      <a href="../f2/chosen.html">Favorites</a>
+      <button id="logout" class="link-button" type="button">Log out</button>
+    </nav>
+  </header>
+
+  <main class="container">
+    <section class="hero">
+      <div aria-hidden="true">
+        <span class="shape shape-circle"></span>
+        <span class="shape shape-ring"></span>
+        <span class="shape shape-dots"></span>
+        <span class="shape shape-square"></span>
+      </div>
+      <div class="avatar-block">
+        <button id="avatar" class="avatar" type="button" aria-label="Change avatar"></button>
+        <button id="change-photo" class="text-button" type="button">Change photo</button>
+        <p class="hint">JPG or PNG, max 5 MB</p>
+        <input id="avatar-input" type="file" accept="image/jpeg,image/png" hidden>
+      </div>
+      <div class="hero-text">
+        <h1 id="user-name"></h1>
+        <p id="user-email" class="muted"></p>
+        <p class="stats">
+          <span id="stat-total" class="chip"></span>
+          <span id="stat-published" class="chip chip-soft"></span>
+          <span id="stat-pending" class="chip chip-soft"></span>
+        </p>
+      </div>
+    </section>
+
+    <noscript><p class="alert">Please enable JavaScript to view your profile</p></noscript>
+    <p id="message" class="alert" role="alert" hidden></p>
+
+    <section>
+      <div class="section-head">
+        <h2>My recipes</h2>
+        <a class="button" href="../recipe-form/recipe-form.html">+ New recipe</a>
+      </div>
+      <div id="recipes" class="grid"></div>
+      <div id="empty" class="empty" hidden>
+        <p>You haven't added any recipes yet.</p>
+        <a class="button" href="../recipe-form/recipe-form.html">Add your first recipe</a>
+      </div>
+    </section>
+  </main>
+
+  <template id="recipe-template">
+    <article class="card">
+      <div class="card-media">
+        <img class="card-photo" alt="" hidden>
+        <div class="card-placeholder"><span aria-hidden="true">🍽</span> No photo</div>
+      </div>
+      <div class="card-body">
+        <h3 class="card-title"></h3>
+        <p class="card-meta muted"></p>
+        <span class="badge"></span>
+        <div class="card-actions">
+          <a class="button button-ghost card-edit">Edit</a>
+          <button class="button button-quiet card-delete" type="button">Delete</button>
+        </div>
+      </div>
+    </article>
+  </template>
+
+  <dialog id="confirm-dialog">
+    <form method="dialog" class="dialog-form">
+      <p>Delete "<strong id="confirm-title"></strong>"?<br>This action cannot be undone.</p>
+      <div class="row">
+        <button class="button button-ghost" value="cancel">Cancel</button>
+        <button class="button button-danger" value="delete">Delete recipe</button>
+      </div>
+    </form>
+  </dialog>
+</body>
+</html>
