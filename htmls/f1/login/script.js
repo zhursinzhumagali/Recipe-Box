@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api/auth/login';
+const API_URL = 'http://localhost:3000';
 const PROFILE_PAGE = '../profile/profile.html';
 const DEFAULT_ERROR = 'Could not sign in. Please try again';
 const NETWORK_ERROR = 'No connection to the server. Check your internet and try again';
@@ -73,7 +73,7 @@ async function sendLogin() {
   let response;
 
   try {
-    response = await fetch(API_URL, {
+    response = await fetch(API_URL + '/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

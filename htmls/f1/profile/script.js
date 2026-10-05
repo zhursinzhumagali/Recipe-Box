@@ -1,11 +1,11 @@
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 const DEMO_USER = { name: 'Adilet', email: 'adilet@mail.com' };
 const DEMO_RECIPES = [
   { id: 1, title: 'Borscht', time: 90, servings: 6, status: 'published' },
   { id: 2, title: 'Tiramisu', time: 40, servings: 8, status: 'pending' },
   { id: 3, title: 'Greek salad', time: 15, servings: 2, status: 'published' },
 ];
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'http://localhost:3000';
 const LOGIN_PAGE = '../login/login.html';
 const EDIT_PAGE = '../recipe-form/recipe-form.html';
 const MAX_AVATAR_MB = 5;
@@ -62,7 +62,7 @@ function hideMessage() {
 async function request(path, options) {
   const settings = options || {};
   settings.headers = settings.headers || {};
-  settings.headers.Authorization = 'Bearer ' + token;
+  settings.headers['x-user-id'] = token;
 
   let response;
 
@@ -189,8 +189,18 @@ function renderRecipes() {
     recipesGrid.appendChild(createCard(recipe));
   });
 }
+function normalizeRecipe(recipe) {
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    time: recipe.cookTimeMinutes,
+    servings: recipe.servings,
+    status: 'published'
+  };
+}
 
 async function loadRecipes() {
+
   if (DEMO_MODE) {
     recipes = DEMO_RECIPES.slice();
     renderRecipes();
@@ -198,9 +208,14 @@ async function loadRecipes() {
   }
 
   try {
-    const response = await request('/users/me/recipes');
-    recipes = await response.json();
+    const response = await request('/recipes/mine');
+
+    const data = await response.json();
+
+    recipes = data.map(normalizeRecipe);
+
     renderRecipes();
+
   } catch (error) {
     showMessage(error.message);
     statTotal.textContent = '0 recipes';

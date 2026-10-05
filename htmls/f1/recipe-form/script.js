@@ -1,4 +1,4 @@
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 const DEMO_CATEGORIES = [
   { id: 1, name: 'Soups' },
   { id: 2, name: 'Desserts' },
@@ -16,7 +16,7 @@ const DEMO_RECIPE = {
   steps: ['Boil the broth', 'Add the vegetables and simmer'],
 };
 
-const API_URL = 'http://localhost:8000/api';
+const API_URL = 'http://localhost:3000';
 const LOGIN_PAGE = '../login/login.html';
 const PROFILE_PAGE = '../profile/profile.html';
 const MAX_PHOTO_MB = 5;
@@ -59,7 +59,7 @@ function showMessages(texts) {
 async function request(path, options) {
   const settings = options || {};
   settings.headers = settings.headers || {};
-  settings.headers.Authorization = 'Bearer ' + token;
+  settings.headers['x-user-id'] = token;
 
   let response;
 
@@ -246,26 +246,26 @@ async function loadRecipe() {
 }
 
 async function sendRecipe(recipe) {
-  if (DEMO_MODE) {
-    return;
-  }
-
-  const formData = new FormData();
-  formData.append('title', recipe.title);
-  formData.append('categoryId', recipe.categoryId);
-  formData.append('description', recipe.description);
-  formData.append('time', recipe.time);
-  formData.append('servings', recipe.servings);
-  formData.append('ingredients', JSON.stringify(recipe.ingredients));
-  formData.append('steps', JSON.stringify(recipe.steps));
-
-  if (photoInput.files[0]) {
-    formData.append('photo', photoInput.files[0]);
-  }
+  const data = {
+    title: recipe.title,
+    categoryId: Number(recipe.categoryId),
+    description: recipe.description,
+    cookTimeMinutes: recipe.time,
+    servings: recipe.servings,
+    ingredients: recipe.ingredients,
+    steps: recipe.steps
+  };
 
   const method = recipeId ? 'PUT' : 'POST';
   const path = recipeId ? '/recipes/' + recipeId : '/recipes';
-  await request(path, { method: method, body: formData });
+
+  await request(path, {
+    method: method,
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(data)
+  });
 }
 
 function setLoading(isLoading) {

@@ -1,5 +1,5 @@
-const DEMO_MODE = true;
-const API_URL = 'http://localhost:8000/api/auth/forgot-password';
+const DEMO_MODE = false;
+const API_URL = 'http://localhost:3000';
 const DEFAULT_ERROR = 'Could not send the email. Please try again';
 const NETWORK_ERROR = 'No connection to the server. Check your internet and try again';
 const SUCCESS_TEXT = 'If an account with this email exists, we have sent a reset link to it';
@@ -50,7 +50,7 @@ async function sendResetRequest() {
   let response;
 
   try {
-    response = await fetch(API_URL, {
+    response = await fetch(API_URL + '/auth/forgot-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email: emailInput.value.trim() }),

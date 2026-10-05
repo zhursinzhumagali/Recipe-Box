@@ -17,7 +17,7 @@ async function request(url, options) {
       if (data.error) {
         message = data.error;
       }
-    } catch (error) {}
+    } catch (error) { }
     throw new Error(message);
   }
 

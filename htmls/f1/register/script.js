@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api/auth/register';
+const API_URL = 'http://localhost:3000';
 const LOGIN_PAGE = '../login/login.html?registered=1';
 const MIN_NAME_LENGTH = 2;
 const MIN_PASSWORD_LENGTH = 8;
@@ -86,7 +86,7 @@ function togglePassword() {
 async function readErrorMessage(response) {
   try {
     const data = await response.json();
-    return data.message || DEFAULT_ERROR;
+    return data.error || data.message || DEFAULT_ERROR;
   } catch (error) {
     return DEFAULT_ERROR;
   }
@@ -96,7 +96,7 @@ async function sendRegistration() {
   let response;
 
   try {
-    response = await fetch(API_URL, {
+    response = await fetch(API_URL + '/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

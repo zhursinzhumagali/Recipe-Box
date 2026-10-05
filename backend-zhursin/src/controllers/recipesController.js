@@ -1,5 +1,74 @@
 import pool from '../db/pool.js';
 
+export async function getMyRecipes(req, res) {
+    try {
+        const result = await pool.query(
+            `SELECT
+                id,
+                title,
+                description,
+                category_id AS "categoryId",
+                ingredients,
+                steps,
+                cook_time_minutes AS "cookTimeMinutes",
+                servings,
+                image_url AS "imageUrl",
+                created_at AS "createdAt",
+                updated_at AS "updatedAt"
+             FROM recipes
+             WHERE author_id = $1
+             ORDER BY created_at DESC`,
+            [req.user.id]
+        );
+
+        res.json(result.rows);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Server error'
+        });
+    }
+}
+
+export async function getRecipe(req, res) {
+    try {
+        const result = await pool.query(
+            `SELECT
+                id,
+                title,
+                description,
+                category_id AS "categoryId",
+                ingredients,
+                steps,
+                cook_time_minutes AS "cookTimeMinutes",
+                servings,
+                image_url AS "imageUrl",
+                created_at AS "createdAt",
+                updated_at AS "updatedAt"
+             FROM recipes
+             WHERE id = $1`,
+            [req.params.id]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({
+                error: 'Recipe not found'
+            });
+        }
+
+        res.json(result.rows[0]);
+
+    } catch (error) {
+        console.error(error);
+
+        res.status(500).json({
+            error: 'Server error'
+        });
+    }
+}
+
 export async function createRecipe(req, res) {
     try {
         const {
