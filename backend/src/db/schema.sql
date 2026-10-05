@@ -26,3 +26,24 @@ CREATE TABLE recipes (
   created_at TIMESTAMP DEFAULT now(),
   updated_at TIMESTAMP DEFAULT now()
 );
+CREATE TABLE favorites (
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  recipe_id INT REFERENCES recipes(id) ON DELETE CASCADE,
+  PRIMARY KEY (user_id, recipe_id)
+);
+
+CREATE TABLE ratings (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  recipe_id INT REFERENCES recipes(id) ON DELETE CASCADE,
+  value INT NOT NULL CHECK (value BETWEEN 1 AND 5),
+  UNIQUE (user_id, recipe_id)
+);
+
+CREATE TABLE comments (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE CASCADE,
+  recipe_id INT REFERENCES recipes(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
