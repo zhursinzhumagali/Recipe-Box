@@ -83,6 +83,24 @@ function placeholder(title, height, radius) {
   );
 }
 
+function photo(recipe, height, radius) {
+  const url = recipe.imageUrl || recipe.image_url;
+  if (!url) {
+    return placeholder(recipe.title, height, radius);
+  }
+  return (
+    '<img src="' +
+    escapeHtml(url) +
+    '" alt="' +
+    escapeHtml(recipe.title) +
+    '" loading="lazy" style="display:block;width:100%;height:' +
+    height +
+    "px;object-fit:cover;border-radius:" +
+    radius +
+    'px">'
+  );
+}
+
 function ratingText(avg) {
   if (avg === null || avg === undefined) {
     return "No ratings yet";
@@ -147,7 +165,7 @@ function createCard(recipe, afterClick) {
 
   card.innerHTML = `
         <a href="recipe.html?id=${recipe.id}">
-            ${placeholder(recipe.title, 190, 0)}
+            ${photo(recipe, 190, 0)}
         </a>
         <div class="card-body">
             <h3><a href="recipe.html?id=${recipe.id}">${escapeHtml(recipe.title)}</a></h3>
@@ -370,9 +388,35 @@ async function loadRecipe() {
       category = '<span class="tag">' + escapeHtml(recipe.category) + "</span>";
     }
 
+    let ingredientsHtml = "";
+    if (Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0) {
+      let items = "";
+      for (let i = 0; i < recipe.ingredients.length; i++) {
+        const item = recipe.ingredients[i];
+        const name = typeof item === "string" ? item : item.name;
+        const amount = typeof item === "string" || !item.amount ? "" : " — " + item.amount;
+        items += "<li>" + escapeHtml(name + amount) + "</li>";
+      }
+      ingredientsHtml =
+        '<div class="panel"><h3>Ingredients</h3><ul style="padding-left:20px">' +
+        items +
+        "</ul></div>";
+    }
+
+    let stepsHtml = "";
+    if (Array.isArray(recipe.steps)) {
+      let items = "";
+      for (let i = 0; i < recipe.steps.length; i++) {
+        items += '<li style="margin-bottom:6px">' + escapeHtml(recipe.steps[i]) + "</li>";
+      }
+      stepsHtml = '<ol style="padding-left:20px">' + items + "</ol>";
+    } else {
+      stepsHtml = "<p>" + escapeHtml(recipe.steps) + "</p>";
+    }
+
     box.innerHTML = `
             <div class="recipe-top">
-                ${placeholder(recipe.title, 260, 18)}
+                ${photo(recipe, 260, 18)}
                 <div>
                     <h2>${escapeHtml(recipe.title)}</h2>
                     <div class="tags">
@@ -387,7 +431,8 @@ async function loadRecipe() {
                 </div>
             </div>
             ${about}
-            <div class="panel"><h3>Instructions</h3><p>${escapeHtml(recipe.steps)}</p></div>
+            ${ingredientsHtml}
+            <div class="panel"><h3>Instructions</h3>${stepsHtml}</div>
             <div class="panel">
                 <h3>Rate this recipe</h3>
                 <div class="actions" id="rate-buttons" style="margin-top:0">
