@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign up — Recipe-Box</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="register">
+    <aside class="intro">
+      <a href="../../f2/main.html" class="logo">Ну Жан!</a>
+      <h1 class="headline">Build your own recipe box</h1>
+      <ul class="perks">
+        <li>Save your favorite dishes</li>
+        <li>Rate recipes and share your opinion</li>
+        <li>Publish your own recipes</li>
+      </ul>
+      <div aria-hidden="true">
+        <span class="shape shape-circle"></span>
+        <span class="shape shape-ring"></span>
+        <span class="shape shape-square"></span>
+        <span class="shape shape-dots"></span>
+        <span class="shape shape-half"></span>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <div aria-hidden="true">
+        <span class="shape blob-circle"></span>
+        <span class="shape blob-ring"></span>
+        <span class="shape blob-square"></span>
+        <span class="shape blob-dots"></span>
+        <span class="shape blob-small"></span>
+      </div>
+      <form id="register-form" class="form" novalidate>
+        <h2>Create account</h2>
+
+        <noscript><p class="alert">Please enable JavaScript to sign up</p></noscript>
+        <p id="server-error" class="alert" role="alert" hidden></p>
+
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" autocomplete="name">
+          <p id="name-error" class="field-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email">
+          <p id="email-error" class="field-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" type="password" autocomplete="new-password" aria-describedby="password-hint">
+            <button id="toggle-password" class="toggle" type="button">Show</button>
+          </div>
+          <p id="password-hint" class="field-hint">At least 8 characters</p>
+          <p id="password-error" class="field-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="confirm">Confirm password</label>
+          <input id="confirm" type="password" autocomplete="new-password">
+          <p id="confirm-error" class="field-error" hidden></p>
+        </div>
+
+        <button id="submit-button" class="submit" type="submit">Sign up</button>
+
+
+         <p class="switch">Already have an account? <a href="../login/login.html">Sign in</a></p>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in — Recipe-Box</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <main class="login-page">
+    <aside class="intro">
+      <a href="../../f2/main.html" class="logo">Ну Жан!</a>
+      <h1 class="headline">Welcome back to the kitchen</h1>
+      <ul class="perks">
+        <li>Your favorite recipes are waiting</li>
+        <li>Your ratings and comments are right here</li>
+        <li>Add a new recipe to your box</li>
+      </ul>
+      <div aria-hidden="true">
+        <span class="shape shape-circle"></span>
+        <span class="shape shape-ring"></span>
+        <span class="shape shape-square"></span>
+        <span class="shape shape-dots"></span>
+        <span class="shape shape-half"></span>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <div aria-hidden="true">
+        <span class="shape blob-circle"></span>
+        <span class="shape blob-ring"></span>
+        <span class="shape blob-square"></span>
+        <span class="shape blob-dots"></span>
+        <span class="shape blob-small"></span>
+      </div>
+      <form id="login-form" class="form" novalidate>
+        <h2>Sign in</h2>
+
+        <noscript><p class="alert">Please enable JavaScript to sign in</p></noscript>
+        <p id="notice" class="notice" role="status" hidden>Account created. Please sign in</p>
+        <p id="server-error" class="alert" role="alert" hidden></p>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" autocomplete="email">
+          <p id="email-error" class="field-error" hidden></p>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="password-wrap">
+            <input id="password" type="password" autocomplete="current-password">
+            <button id="toggle-password" class="toggle" type="button">Show</button>
+          </div>
+          <p id="password-error" class="field-error" hidden></p>
+          <a href="../forgot-password/forgot.html" class="forgot">Forgot password?</a>
+        </div>
+
+        <button id="submit-button" class="submit" type="submit">Sign in</button>
+
+
+<p class="switch">Don't have an account? <a href="../register/register.html">Sign up</a></p>
+      </form>
+    </section>
+  </main>
+</body>
+</html>

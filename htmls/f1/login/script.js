@@ -1,20 +1,17 @@
-const API_URL = 'http://localhost:8000/api/auth/register';
-const LOGIN_PAGE = 'login.html';
-const MIN_NAME_LENGTH = 2;
-const MIN_PASSWORD_LENGTH = 8;
-const DEFAULT_ERROR = 'Не удалось создать аккаунт. Попробуйте ещё раз';
-const NETWORK_ERROR = 'Нет связи с сервером. Проверьте интернет и попробуйте снова';
+const API_URL = 'http://localhost:8000/api/auth/login';
+const PROFILE_PAGE = '../profile/profile.html';
+const DEFAULT_ERROR = 'Could not sign in. Please try again';
+const NETWORK_ERROR = 'No connection to the server. Check your internet and try again';
 
-const form = document.getElementById('register-form');
-const nameInput = document.getElementById('name');
+const form = document.getElementById('login-form');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
-const confirmInput = document.getElementById('confirm');
 const toggleButton = document.getElementById('toggle-password');
 const submitButton = document.getElementById('submit-button');
 const serverError = document.getElementById('server-error');
+const notice = document.getElementById('notice');
 
-const allInputs = [nameInput, emailInput, passwordInput, confirmInput];
+const allInputs = [emailInput, passwordInput];
 
 function showError(input, message) {
   const error = document.getElementById(input.id + '-error');
@@ -34,53 +31,33 @@ function clearAllErrors() {
   serverError.hidden = true;
 }
 
-function checkName() {
-  if (nameInput.value.trim().length < MIN_NAME_LENGTH) {
-    showError(nameInput, 'Введите имя не короче ' + MIN_NAME_LENGTH + ' символов');
-    return false;
-  }
-  return true;
-}
-
 function checkEmail() {
   const email = emailInput.value.trim();
   if (!email.includes('@') || !email.includes('.')) {
-    showError(emailInput, 'Введите email в формате name@mail.com');
+    showError(emailInput, 'Enter your email in the format name@mail.com');
     return false;
   }
   return true;
 }
 
 function checkPassword() {
-  if (passwordInput.value.length < MIN_PASSWORD_LENGTH) {
-    showError(passwordInput, 'Пароль должен быть не короче ' + MIN_PASSWORD_LENGTH + ' символов');
-    return false;
-  }
-  return true;
-}
-
-function checkConfirm() {
-  if (confirmInput.value !== passwordInput.value) {
-    showError(confirmInput, 'Пароли не совпадают');
+  if (passwordInput.value === '') {
+    showError(passwordInput, 'Enter your password');
     return false;
   }
   return true;
 }
 
 function isFormValid() {
-  const nameOk = checkName();
   const emailOk = checkEmail();
   const passwordOk = checkPassword();
-  const confirmOk = checkConfirm();
-  return nameOk && emailOk && passwordOk && confirmOk;
+  return emailOk && passwordOk;
 }
 
 function togglePassword() {
   const isHidden = passwordInput.type === 'password';
-  const newType = isHidden ? 'text' : 'password';
-  passwordInput.type = newType;
-  confirmInput.type = newType;
-  toggleButton.textContent = isHidden ? 'Скрыть' : 'Показать';
+  passwordInput.type = isHidden ? 'text' : 'password';
+  toggleButton.textContent = isHidden ? 'Hide' : 'Show';
 }
 
 async function readErrorMessage(response) {
@@ -92,7 +69,7 @@ async function readErrorMessage(response) {
   }
 }
 
-async function sendRegistration() {
+async function sendLogin() {
   let response;
 
   try {
@@ -100,7 +77,6 @@ async function sendRegistration() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        name: nameInput.value.trim(),
         email: emailInput.value.trim(),
         password: passwordInput.value,
       }),
@@ -112,16 +88,28 @@ async function sendRegistration() {
   if (!response.ok) {
     throw new Error(await readErrorMessage(response));
   }
+
+  return await response.json();
+}
+
+function saveSession(data) {
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('user', JSON.stringify(data.user));
+}
+
+function goToNextPage() {
+  window.location.href = PROFILE_PAGE;
 }
 
 function setLoading(isLoading) {
   submitButton.disabled = isLoading;
-  submitButton.textContent = isLoading ? 'Создаём аккаунт…' : 'Зарегистрироваться';
+  submitButton.textContent = isLoading ? 'Signing in…' : 'Sign in';
 }
 
 async function handleSubmit(event) {
   event.preventDefault();
   clearAllErrors();
+  notice.hidden = true;
 
   if (!isFormValid()) {
     return;
@@ -130,15 +118,17 @@ async function handleSubmit(event) {
   setLoading(true);
 
   try {
-    await sendRegistration();
-    window.location.href = LOGIN_PAGE;
+    const data = await sendLogin();
+    saveSession(data);
+    goToNextPage();
   } catch (error) {
     serverError.textContent = error.message;
     serverError.hidden = false;
-  } finally {
     setLoading(false);
   }
 }
+
+notice.hidden = !window.location.search.includes('registered=1');
 
 allInputs.forEach(function (input) {
   input.addEventListener('input', function () {

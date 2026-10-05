@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Recipe — Recipe-Box</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <svg class="sprite" aria-hidden="true" focusable="false">
+    <symbol id="i-bowl" viewBox="0 0 64 64"><path d="M6 28h52a26 26 0 0 1-52 0z" fill="currentColor"/><path d="M22 20c-4-4 4-6 0-12M34 20c-4-4 4-6 0-12M46 20c-4-4 4-6 0-12" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-cupcake" viewBox="0 0 64 64"><path d="M16 40h32l-4 18H20z" fill="currentColor"/><path d="M12 36c0-12 8-20 20-20s20 8 20 20z" fill="currentColor"/><circle cx="32" cy="10" r="4" fill="currentColor"/></symbol>
+    <symbol id="i-cutlery" viewBox="0 0 64 64"><path d="M14 6v16a7 7 0 0 0 5 6.7V58h4V28.7a7 7 0 0 0 5-6.7V6h-3v14h-3V6h-3v14h-3V6z" fill="currentColor"/><path d="M46 6c-7 6-9 18-7 30h7v22h4V6z" fill="currentColor"/></symbol>
+    <symbol id="i-pizza" viewBox="0 0 64 64"><path d="M32 60 4 16a48 48 0 0 1 56 0z" fill="currentColor"/><circle class="cut" cx="26" cy="26" r="4"/><circle class="cut" cx="38" cy="32" r="4"/><circle class="cut" cx="30" cy="42" r="3"/></symbol>
+    <symbol id="i-carrot" viewBox="0 0 64 64"><path d="M44 16c6 6 4 14-2 22L16 60 4 48 26 22c4-8 12-12 18-6z" fill="currentColor"/><path d="M46 14l8-8M50 20l10-4M42 10l2-8" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></symbol>
+    <symbol id="i-mug" viewBox="0 0 64 64"><path d="M8 22h36v22a14 14 0 0 1-14 14H22A14 14 0 0 1 8 44z" fill="currentColor"/><path d="M44 28h6a7 7 0 0 1 0 14h-6" fill="none" stroke="currentColor" stroke-width="4"/></symbol>
+  </svg>
+  <div class="backdrop" aria-hidden="true">
+    <svg class="doodle d1"><use href="#i-bowl"/></svg>
+    <svg class="doodle d2"><use href="#i-cupcake"/></svg>
+    <svg class="doodle d3"><use href="#i-cutlery"/></svg>
+    <svg class="doodle d4"><use href="#i-pizza"/></svg>
+    <svg class="doodle d5"><use href="#i-carrot"/></svg>
+    <svg class="doodle d6"><use href="#i-mug"/></svg>
+  </div>
+  <header class="topbar">
+    <a href="../../f2/main.html" class="logo">Ну Жан!</a>
+    <nav>
+      <a href="../../f2/main.html">Home</a>
+      <a href="../../f2/chosen.html">Favorites</a>
+      <a href="../profile/profile.html">Profile</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <form id="recipe-form" class="panel" novalidate>
+      <div>
+        <h1 id="page-title">New recipe</h1>
+        <p class="muted">Fill in the details. Your recipe will be reviewed before it is published.</p>
+      </div>
+
+      <noscript><p class="alert">Please enable JavaScript to use this form</p></noscript>
+      <div id="message" class="alert" role="alert" hidden></div>
+
+      <div class="field">
+        <label for="title">Title</label>
+        <input id="title" type="text" maxlength="100">
+      </div>
+
+      <div class="field">
+        <label for="category">Category</label>
+        <select id="category">
+          <option value="">Choose a category</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="description">Description</label>
+        <textarea id="description" rows="3" maxlength="500"></textarea>
+      </div>
+
+      <div class="two-cols">
+        <div class="field">
+          <label for="time">Cooking time, min</label>
+          <input id="time" type="number" min="1">
+        </div>
+        <div class="field">
+          <label for="servings">Servings</label>
+          <input id="servings" type="number" min="1">
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="photo">Photo</label>
+        <input id="photo" type="file" accept="image/jpeg,image/png">
+        <p class="hint">JPG or PNG, max 5 MB</p>
+        <img id="photo-preview" class="photo-preview" alt="Selected dish photo" hidden>
+      </div>
+
+      <fieldset>
+        <legend>Ingredients</legend>
+        <div id="ingredients"></div>
+        <button id="add-ingredient" class="button button-ghost" type="button">+ Add ingredient</button>
+      </fieldset>
+
+      <fieldset>
+        <legend>Steps</legend>
+        <div id="steps"></div>
+        <button id="add-step" class="button button-ghost" type="button">+ Add step</button>
+      </fieldset>
+
+      <div class="form-actions">
+        <button id="submit-button" class="button" type="submit">Save recipe</button>
+        <a class="button button-ghost" href="../profile/profile.html">Cancel</a>
+      </div>
+    </form>
+  </main>
+
+  <template id="ingredient-template">
+    <div class="dyn-row">
+      <input class="ingredient-name" type="text" placeholder="Ingredient" aria-label="Ingredient">
+      <input class="ingredient-amount" type="text" placeholder="Amount, e.g. 200 g" aria-label="Amount">
+      <button class="remove-button" type="button" aria-label="Remove ingredient">✕</button>
+    </div>
+  </template>
+
+  <template id="step-template">
+    <div class="dyn-row">
+      <textarea class="step-text" rows="2" placeholder="Describe this step" aria-label="Step"></textarea>
+      <button class="remove-button" type="button" aria-label="Remove step">✕</button>
+    </div>
+  </template>
+</body>
+</html>
